@@ -45,6 +45,34 @@ Testing Zeroshot-HDRV on a .mp4 video (this requires FFMPEG installed):
 python3 zhdrv.py video01.mp4 --data_type video
 ```
 
+
+OUTPUTS:
+==============
+
+When running ZHDRV on a video; e.g., fireplace.mp4, a hierarchy sof outputs will be generated in the folder ./runs; here is an example:
+
+```
+run
+|
+|___fireplace_lr0.0001_e128_b1_m4_t1_s-2
+    |
+    |___ckpt
+    |
+    |___fireplace_exr
+    |
+    |___recs
+    |
+    |___logs.csv
+    |
+    |___params.csv
+```
+
+the folder ```ckpt``` contains the best and the last weights checkpoints for the network, 
+the folder ```fireplace_exr``` containts the EXR final frames of the videos after expansion, and
+the folder ```recs``` containts the exposures results for the most over-exposed frame; this folder is updated during training and it is useful to
+check what the network is learning. Finally, params.csv contains the paramters of the training and logs.csv the total loss function per epoch.
+
+
 NOTES ON TIMINGS:
 ==============
 This version of the code is not optimized for speed as the version used for the paper. This version is optimized to maximize compatibility with hardware (it does not require a CUDA-device), please refer to the paper timings.
