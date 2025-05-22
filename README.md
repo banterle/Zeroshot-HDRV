@@ -13,21 +13,20 @@ Note that the state-of-the-art method, since they are based on static weights th
 ![HDR-VDP](images/zoom.png?raw=true "Zeroshot-HDRV")
 
 
-DEPENDENCIES:
+SETUP:
 ==============
 
-Requires the PyTorch library along with PIL, NumPy, SciPy, etc.
+Clone our repo and install dependencies. This is necessary for running ZHDRV.
 
-As the first step, you need to follow the [instructions for installing PyTorch](http://pytorch.org/).
-
-To install dependencies, please use the following command: 
-
-```bash
-pip install -r requirements.txt 
+```
+conda create -n zhdrv
+conda activate zhdrv
+conda install ffmpeg
+pip install -r requirements.txt
 ```
 
-FFMPEG is required to process .mp4 files, please follow [the instruction for instaling it](https://ffmpeg.org/download.html).
-If the video is already exported as a sequence of .png files, FFMPEG is not required.
+FFMPEG is required to process .mp4/.mov files, please follow [the instruction for instaling it](https://ffmpeg.org/download.html).
+Note that if the video is already exported as a sequence of .png files, FFMPEG is not required.
 
 HOW TO RUN IT:
 ==============
@@ -75,7 +74,7 @@ check what the network is learning. Finally, params.csv contains the paramters o
 
 NOTES ON TIMINGS:
 ==============
-This version of the code is not optimized for speed as the version used for the paper. This version is optimized to maximize compatibility with hardware (it does not require a CUDA-device), please refer to the paper timings.
+This version of the code is not optimized for speed as the version used for the paper. This version is optimized to maximize compatibility with hardware (it does not require a CUDA-device) and video resolutions. Please refer to the paper timings.
 
 WEIGHTS DOWNLOAD:
 =================
