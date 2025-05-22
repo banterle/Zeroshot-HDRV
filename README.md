@@ -41,9 +41,17 @@ python3 zhdrv.py ./video01_sdr/ --data_type video
 Testing Zeroshot-HDRV on a .mp4 video (this requires FFMPEG installed):
 
 ```
-python3 zhdrv.py video01.mp4 --data_type video
+python3 zhdrv.py examples/windows.mp4 --data_type video
 ```
 
+By default, the method generates -4-stop, -2-stop, +2-stop, and +4-stop exposures. Depending on the input scene, more exposures may be required to recover the dynamic range fully. For example, "examples/fireplace" requires to generate -6-stop to fully recover the fire. To achieve that please use the following command:
+
+```
+python3 zhdrv.py examples/fireplace.mp4 --data_type video --n_exp_down 3 --n_exp_up 2
+```
+
+--n_exp_down 3 means that the method generates three low exposures; i.e., -2-stop, -4-stop, and -6-stop.
+--n_exp_up 2 means that the method generates two high exposures; i.e., +2-stop and +4-stop.
 
 OUTPUTS:
 ==============
