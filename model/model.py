@@ -13,6 +13,7 @@ from torch import nn
 
 from model.uber_pooling_layer import *
 from model.cropping_layer import *
+from model.sa import SelfAttention
 
 #
 #
@@ -75,7 +76,7 @@ def merge(x, y):
 #Network
 #
 class UNet(nn.Module):
-    def __init__(self, n_input=3, n_output=3, bFull = False, fstop = 2.0, maskVal = 0.5):
+    def __init__(self, n_input=3, n_output=3, fstop = 2.0, bFull = False, maskVal = 0.5):
         super().__init__()
         
         self.maskVal = maskVal
@@ -100,6 +101,8 @@ class UNet(nn.Module):
         self.d2 = UDown(r[1], r[2])          #128x128
         self.d3 = UDown(r[2], r[3])          #64x64
         self.bFull = bFull
+
+        self.sa = SelfAttention(r[3])
         
         if bFull:
             self.d4 = UDown(r[3], r[4])
@@ -136,6 +139,8 @@ class UNet(nn.Module):
             u3 = self.u3(merge(u4, o3))
         else:
             u3 = self.u3(o3)
+
+        u3 = self.sa(u3)
         
         o2 = Crop2D(o2, u3)
         u2 = self.u2(merge(u3, o2))
