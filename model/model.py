@@ -68,7 +68,7 @@ class UUp(nn.Module):
         return self.up(x)
 
 def merge(x, y):
-    return cat((x, y), 1)
+    return torch.cat((x, y), 1)
     
               
 #
@@ -112,8 +112,16 @@ class UNet(nn.Module):
         self.u1 = UUp(2 * r[1], r[0])
         self.u0 = UUp(2 * r[0], n_output, True)
         
-        
-    def forward(self, v_input):    
+    #
+    #
+    #
+    def divider(self):
+        return 64        
+
+    #
+    #
+    #
+    def forward(self, v_input, mask = None):    
 
         o0 = self.d0(v_input)
         o1 = self.d1(o0)
