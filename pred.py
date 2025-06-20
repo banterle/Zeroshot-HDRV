@@ -101,13 +101,13 @@ def evalFolder(args, bWrite = True, bVideo = False):
             success, fn, frame = v.getNextFrame(True, i)
             
             sz_sdr = frame.shape
-            frame, bFlag = addBorder(frame, 16)
+            #frame, bFlag = addBorder(frame, 16)
             
             #expand the frame and build an HDR frame
             img_hdr, sz = buildHDRFromNet(model, frame * args.scale, False, args.transferfunction, n_exp_down = args.n_exp_down, n_exp_up = args.n_exp_up)
             
-            if bFlag:
-                img_hdr = img_hdr[0:sz_sdr[0],0:sz_sdr[1],:]
+            #if bFlag:
+            #    img_hdr = img_hdr[0:sz_sdr[0],0:sz_sdr[1],:]
             
             sz = img_hdr.shape
 

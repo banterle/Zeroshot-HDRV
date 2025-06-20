@@ -13,7 +13,6 @@ from torch import nn
 
 from model.uber_pooling_layer import *
 from model.cropping_layer import *
-from model.sa import SelfAttention
 
 #
 #
@@ -93,7 +92,7 @@ class UNet(nn.Module):
             self.w = 1.0
             self.sigma = 0.15
                 
-#        r = [64, 128, 256, 512, 512]
+        #r = [64, 128, 256, 512, 512]
         r = [32, 64, 128, 256, 256]
 
         self.d0 = UDown(n_input, r[0], True) #512x512
@@ -101,9 +100,7 @@ class UNet(nn.Module):
         self.d2 = UDown(r[1], r[2])          #128x128
         self.d3 = UDown(r[2], r[3])          #64x64
         self.bFull = bFull
-
-        self.sa = SelfAttention(r[3])
-        
+       
         if bFull:
             self.d4 = UDown(r[3], r[4])
             self.u4 = UUp(r[4], r[3])
@@ -119,7 +116,7 @@ class UNet(nn.Module):
     #
     #
     def divider(self):
-        return 64        
+        return 16        
 
     #
     #
@@ -139,9 +136,7 @@ class UNet(nn.Module):
             u3 = self.u3(merge(u4, o3))
         else:
             u3 = self.u3(o3)
-
-        u3 = self.sa(u3)
-        
+                    
         o2 = Crop2D(o2, u3)
         u2 = self.u2(merge(u3, o2))
         

@@ -174,6 +174,7 @@ class UNetUD(nn.Module):
     #
     def addPadding(self, img):
         sz = img.shape
+
         div = self.D.divider()
         sz2 = int(np.ceil(sz[2] / div) * div)
         sz3 = int(np.ceil(sz[3] / div) * div)
@@ -195,7 +196,6 @@ class UNetUD(nn.Module):
             img = img.unsqueeze(0)
         
         sz_ori = img.shape
-        img = self.addPadding(img)
 
         exposures = []
         exposures_times = []
@@ -205,6 +205,7 @@ class UNetUD(nn.Module):
         
         img_i = img
         for i in range(1, (n_exp_down + 1)):
+            img_i = self.addPadding(img_i)
             img_i = self.getExpD(img_i)
             img_i = img_i[:,:,0:sz_ori[2],0:sz_ori[3]]
             exposures.append(fromTorchToNP(img_i.data.cpu().numpy().squeeze()))
@@ -213,6 +214,7 @@ class UNetUD(nn.Module):
 
         img_i = img
         for i in range(1, (n_exp_up + 1)):
+            img_i = self.addPadding(img_i)
             img_i = self.getExpU(img_i)
             img_i = img_i[:,:,0:sz_ori[2],0:sz_ori[3]]
             exposures.append(fromTorchToNP(img_i.data.cpu().numpy().squeeze()))
