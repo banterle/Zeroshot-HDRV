@@ -59,7 +59,7 @@ class SDRDataset(Dataset):
         if area == -1:
             self.numPatches = 4
         else:
-            self.numPatches = area // (self.patchSize * self.patchSize * 2)
+            self.numPatches = area // (self.patchSize * self.patchSize)
             if self.numPatches <= 0:
                 self.numPatches = 1
 
