@@ -19,33 +19,7 @@ from util.util_io import *
 from util.util_np import *
 from util.util_torch import *
 
-from PIL import Image
-    
-from collections import OrderedDict
-
-#
-#
-#
-class CachedImages:
-    
-    #
-    #
-    #
-    def __init__(self):
-        self.cache = OrderedDict()
-
-    #
-    #
-    #
-    def get(self, path):
-        if path in self.cache:
-            self.cache.move_to_end(path)
-            return self.cache[path].copy()
-        else:
-            img = Image.open(path).convert('RGB')
-            self.cache[path] = img            
-            return img.copy()
-
+from PIL import Image   
 
 #
 #
@@ -83,7 +57,7 @@ class SDRDataset(Dataset):
     #
     #
     def read_img(self, fname, index = 0, group = None):
-        img = self.cache.get(fname)#Image.open(fname)
+        img = Image.open(fname)
     
         if( group != None ):
             img = torchDataAugmentation(img, index)
