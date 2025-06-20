@@ -39,8 +39,6 @@ class SDRDataset(Dataset):
         self.patchSize = 128
         self.bTemporal = temporal
 
-        self.cache = CachedImages()
-
         if area == -1:
             self.numPatches = 4
         else:
