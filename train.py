@@ -58,8 +58,10 @@ def train(epoch, loader, model, optimizer, args, scheduler = None):
         if torch.cuda.is_available():
             f0 = f0.cuda()
             o0 = o0.cuda()
-            o0_n = o0_n.cuda()
-            f0_n = f0_n.cuda()
+
+            if (args.temp > 0):
+                o0_n = o0_n.cuda()
+                f0_n = f0_n.cuda()
         
         if args.mode == 0:
             #ACM SIGGRAPH 2021 and ACM SIGGRAPH ASIA 2021 submissions
@@ -234,7 +236,8 @@ if __name__ == '__main__':
     img = npImgRead(filename_rec)
     num_pixels = img.shape[0] * img.shape[1]
 
-    train_data = SDRDataset(train_data, group = args.group, expo_shift = args.es, scale = args.scale, area = num_pixels)
+    bTemporal = (args.temp > 0)
+    train_data = SDRDataset(train_data, group = args.group, expo_shift = args.es, scale = args.scale, area = num_pixels, temporal = bTemporal)
     
     train_loader = DataLoader(train_data,  batch_size=args.batch, shuffle=True, num_workers=8, pin_memory=True)
 
