@@ -74,6 +74,13 @@ def crop_center(img,csize):
 #
 def torchDataAugmentation(img, j):
     img_out = []
+
+    if j < 0:
+        j = 0
+    else:
+        if j > 7:
+            j = 7
+    
     if(j == 0):
         img_out = img
     elif (j == 1):
@@ -85,19 +92,14 @@ def torchDataAugmentation(img, j):
     elif (j == 4):
         img_out = T.functional.hflip(img)
     elif (j == 5):
-        img_tmp = T.functional.rotate(img, 90)
-        img_out = T.functional.hflip(img_tmp)
+        img_out = T.functional.vflip(img)
         del img_tmp
     elif (j == 6):
-        img_out = T.functional.vflip(img)
+        img_tmp = T.functional.rotate(img, 90)
+        img_out = T.functional.hflip(img_tmp)
     elif (j == 7):
-        img_out = T.functional.adjust_saturation(img, 2.0)
-    elif (j == 8):
-        img_out = T.functional.rotate(img, 30)
-    elif (j == 9):
-        img_out = T.functional.rotate(img, -30)
-    #else:
-    #    img_out = T.functional.rotate(img, -30)
+        img_tmp = T.functional.rotate(img, 90)
+        img_out = T.functional.vflip(img_tmp)
         
     return img_out
 
