@@ -92,14 +92,15 @@ def torchDataAugmentation(img, j):
     elif (j == 4):
         img_out = T.functional.hflip(img)
     elif (j == 5):
-        img_out = T.functional.vflip(img)
-        del img_tmp
+        img_out = T.functional.vflip(img)        
     elif (j == 6):
         img_tmp = T.functional.rotate(img, 90)
         img_out = T.functional.hflip(img_tmp)
+        del img_tmp
     elif (j == 7):
         img_tmp = T.functional.rotate(img, 90)
         img_out = T.functional.vflip(img_tmp)
+        del img_tmp
         
     return img_out
 
