@@ -259,4 +259,5 @@ def fromNPtoVideoFrame(frame, fGamma = 2.2, BGR = False):
         out[:,:,0] = frame[:,:,0]
         out[:,:,1] = frame[:,:,1]
         out[:,:,2] = frame[:,:,2]
+        
     return out
