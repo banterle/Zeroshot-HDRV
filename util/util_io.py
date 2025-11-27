@@ -144,14 +144,17 @@ def fromTorchToPil(p):
 #
 def npReadHDRWithCV(filename, bBGR = True):
     img = cv2.imread(filename, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
-    img = np.array(img, dtype=np.float)
-    
+   
     out = np.zeros(img.shape, dtype = np.float32)
 
     if bBGR:
         out[:,:,0] = img[:,:,2]
         out[:,:,1] = img[:,:,1]
         out[:,:,2] = img[:,:,0]
+    else:
+        out[:,:,0] = img[:,:,0]
+        out[:,:,1] = img[:,:,1]
+        out[:,:,2] = img[:,:,2]
         
     return out
 
