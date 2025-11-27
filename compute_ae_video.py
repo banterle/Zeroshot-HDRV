@@ -10,24 +10,26 @@ from util.util_np import npLuminance, npApplyGamma, fromNPtoVideoFrame
 #
 #
 #
-def computeAutomaticExposure(img, pML, alpha = 0.5):
+def computeAutomaticExposure(img, pML, alpha = 0.5, bCentral = False):
     width, height, cols  = img.shape
 
     L = npLuminance(img)
-    wh = width // 2
-    hh = height // 2
-    dw = width // 4
-    dh = height // 4
+
+    if bCentral:
+        sw = width // 3
+        sh = height // 3
+        ew = (width * 2) // 3
+        eh = (height * 2) // 3
+        L = L[sw:ew,sh:eh]
     
     L1 = L.flatten()
     L1 = np.sort(L1)
     n = len(L1)
     n_half = int(np.round(n * 0.5))
 
-    mL0 = np.mean(L) * 4
-    mL1 = L1[(n*90)//100]
+    mL0 = np.mean(L) * 4  
+    mL1 = L1[(n*90)//100] #90-th percentile
     mL = np.max([mL0, mL1])
-    print([mL0, mL1, mL])
 
     if pML > 0.0:
        mL = mL * alpha + pML * (1.0 - alpha)
@@ -63,6 +65,7 @@ def processFolder(base_dir, v, format, fstop = 0.0, bVideo = False, bImages = Tr
     for i in range(0, tot - 1):
         name = total_names[i]
         name_dir = os.path.join(base_dir2, name)
+        print(name_dir)
         img = npReadHDRWithCV(name_dir, False)
 
         pML, exp_i = computeAutomaticExposure(img, pML, 1.0 / 15.0)
