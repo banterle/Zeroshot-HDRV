@@ -11,17 +11,27 @@ from util.io import mkdir_s
 #
 #
 #
-def computeAutomaticExposure(img, pML, alpha = 0.5, bCentral = False):
+def computeAutomaticExposure(img, pML, alpha = 0.5, bCentral = 'Central'):
     width, height, cols  = img.shape
 
     L = npLuminance(img)
 
-    if bCentral:
+    if bCentral == 'Mid9':
         sw = width // 3
         sh = height // 3
         ew = (width * 2) // 3
         eh = (height * 2) // 30
         L = L[sw:ew,sh:eh]
+
+    if bCentral == 'Central':
+        value = min([width, height])
+
+        wh = width // 2
+        vh = value // 2
+        sw = wh - vh
+        ew = wh + vh
+        L = L[sw:ew,:]
+
     
     L1 = L.flatten()
     L1 = np.sort(L1)
@@ -31,7 +41,7 @@ def computeAutomaticExposure(img, pML, alpha = 0.5, bCentral = False):
     mL0 = np.mean(L) * 4
     mL1 = L1[(n*90)//100]
     mL = np.max([mL0, mL1])
-    print([mL0, mL1, mL])
+    #print([mL0, mL1, mL])
 
     if pML > 0.0:
        mL = mL * alpha + pML * (1.0 - alpha)
@@ -42,7 +52,7 @@ def computeAutomaticExposure(img, pML, alpha = 0.5, bCentral = False):
 #
 #
 #
-def processFolder(base_dir, v, format, fstop = 0.0, bVideo = False, bImages = True):
+def processFolder(base_dir, v, format, fstop = 0.0, bVideo = False, bImages = True, bCentral = 'Central'):
     base_dir2 = os.path.join(base_dir, v)
     total_names = [f for f in os.listdir(base_dir2) if f.endswith(format)]
 
@@ -77,7 +87,7 @@ def processFolder(base_dir, v, format, fstop = 0.0, bVideo = False, bImages = Tr
         print(name_dir)
         img = npReadHDRWithCV(name_dir, False)
 
-        pML, exp_i = computeAutomaticExposure(img, pML, 1.0 / 15.0)
+        pML, exp_i = computeAutomaticExposure(img, pML, 1.0 / 15.0, bCentral)
 
         width, height, cols  = img.shape
         if (flag and bVideo):
