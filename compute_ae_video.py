@@ -6,6 +6,7 @@ import cv2
 
 from util.util_io import npReadHDRWithCV
 from util.util_np import npLuminance, npApplyGamma, fromNPtoVideoFrame
+from util.io import mkdir_s
 
 #
 #
@@ -19,7 +20,7 @@ def computeAutomaticExposure(img, pML, alpha = 0.5, bCentral = False):
         sw = width // 3
         sh = height // 3
         ew = (width * 2) // 3
-        eh = (height * 2) // 3
+        eh = (height * 2) // 30
         L = L[sw:ew,sh:eh]
     
     L1 = L.flatten()
@@ -27,9 +28,10 @@ def computeAutomaticExposure(img, pML, alpha = 0.5, bCentral = False):
     n = len(L1)
     n_half = int(np.round(n * 0.5))
 
-    mL0 = np.mean(L) * 4  
-    mL1 = L1[(n*90)//100] #90-th percentile
+    mL0 = np.mean(L) * 4
+    mL1 = L1[(n*90)//100]
     mL = np.max([mL0, mL1])
+    print([mL0, mL1, mL])
 
     if pML > 0.0:
        mL = mL * alpha + pML * (1.0 - alpha)
@@ -43,6 +45,13 @@ def computeAutomaticExposure(img, pML, alpha = 0.5, bCentral = False):
 def processFolder(base_dir, v, format, fstop = 0.0, bVideo = False, bImages = True):
     base_dir2 = os.path.join(base_dir, v)
     total_names = [f for f in os.listdir(base_dir2) if f.endswith(format)]
+
+    if len(total_names) == 0:
+        return
+
+    output_folder_str = base_dir2 + '_sdr'
+    mkdir_s(output_folder_str)
+
     total_names = sorted(total_names)
 
     flag = True
@@ -83,7 +92,7 @@ def processFolder(base_dir, v, format, fstop = 0.0, bVideo = False, bImages = Tr
             frame = fromNPtoVideoFrame(frame_gamma, -1.0, False)
 
             img_fn = os.path.splitext(name)[0] + '.png'
-            name_dir = os.path.join(base_dir, os.path.join(v, img_fn))
+            name_dir = os.path.join(output_folder_str, img_fn)
             cv2.imwrite(name_dir, frame)
 
             if bVideo:
