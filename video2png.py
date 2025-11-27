@@ -42,17 +42,25 @@ def process1Video(path_video, fmt = 'png', bRescale = True):
     
     result = getColorSpaceInfo(path_video)
 
+    bSet = False
     if 'unknown' in result:
         exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
+        bSet = True
 
     if ('bt709' in result):
         exec_str = 'ffmpeg -i ' + path_video + ' -vf "zscale=t=709:p=bt709:m=bt709,format=rgb24" ' + frame_out_str
-        
+        bSet = True
+
     if ('bt470bg' in result):
         exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
+        bSet = True
 
     if 'bt2020' in result:
         exec_str = 'ffmpeg -i ' + path_video + ' -vf "zscale=t=linear:npl=50,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=linear:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p" ' + frame_out_str
+        bSet = True
+
+    if bSet == False:
+        exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
 
     subprocess.call(exec_str, shell=True)
  

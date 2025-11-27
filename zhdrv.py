@@ -53,10 +53,13 @@ if __name__ == '__main__':
         params['sampling'] = 1
         params['temp'] = 0
 
+    print(args.already_trained)
     if args.already_trained == 'False':
         if args.data_type == 'video':
             #is this video a folder or a .mp4 file?
-            if os.path.isfile(data_path):
+            video_str = os.path.splitext(data_path)[1].lower()
+            if video_str == '.mp4' or video_str == '.mov':
+                print("Converting video into images...")
                 subprocess.call('python video2png.py ' + data_path, shell=True)
                     
             data_path = os.path.splitext(data_path)[0]
