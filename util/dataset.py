@@ -29,20 +29,20 @@ class SDRDataset(Dataset):
     #
     #
     #
-    def __init__(self, data, group = None,  expo_shift = 2.0, bRandom = False, scale = 1.0, area = -1, temporal = True):
+    def __init__(self, data, group = None,  expo_shift = 2.0, bRandom = False, scale = 1.0, area = -1, temporal = True, patchSize = 128):
         self.data = data
         self.expo_shift = expo_shift
         self.group = group
         self.bRandom = bRandom
         self.epoch = 0
         self.scale = scale
-        self.patchSize = 128
+        self.patchSize = patchSize
         self.bTemporal = temporal
 
         if area == -1:
             self.numPatches = 4
         else:
-            self.numPatches = area // (self.patchSize * self.patchSize)
+            self.numPatches = area // (2 * self.patchSize * self.patchSize)
             if self.numPatches <= 0:
                 self.numPatches = 1
 
