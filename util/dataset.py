@@ -29,7 +29,7 @@ class SDRDataset(Dataset):
     #
     #
     #
-    def __init__(self, data, group = None,  expo_shift = 2.0, bRandom = False, scale = 1.0, area = -1, temporal = True, patchSize = 128):
+    def __init__(self, data, group = None,  expo_shift = 2.0, bRandom = False, scale = 1.0, area = -1, temporal = True, patchSize = 512):
         self.data = data
         self.expo_shift = expo_shift
         self.group = group
@@ -95,7 +95,7 @@ class SDRDataset(Dataset):
         if self.bTemporal:
             img_sdr_n = self.read_img(sample.Next, index_t, self.group) * self.scale
                     
-        if (self.patchSize < img_sdr.shape[1]) and (self.patchSize < img_sdr.shape[2]):
+        if (self.patchSize <= img_sdr.shape[1]) and (self.patchSize <= img_sdr.shape[2]):
             limit_y = img_sdr.shape[1] - self.patchSize - 1
             limit_x = img_sdr.shape[2] - self.patchSize - 1
             bestAvg = 0.0

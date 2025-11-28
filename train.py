@@ -183,6 +183,10 @@ if __name__ == '__main__':
 
     os.environ['OPENCV_IO_ENABLE_OPENEXR'] = '1'
 
+    if torch.cuda.is_available():
+        print("CUDA is On")
+    else:
+        print("CUDA is off")
 
     print('F-stop: ' + str(args.es))
     print('Alpha: ' + str(args.alpha))
