@@ -230,7 +230,7 @@ if __name__ == '__main__':
     args_data = args.data
     if args.ensemble == 1:
         #training multiple videos at the same time
-        tr0, filename_rec = genDataset(args.data, '', args, recs_dir)
+        tr0, filename_rec = genDataset(args.data, args)
     else:
         args.data = getGlobalPath(args.data)
         train_data, filename_rec, num_frames = split_data_from_video_sdr(args_data, args.es, group=args.group, sampling = args.sampling, recs_dir = args.recs_dir, scaling = args.scale, samples_is = args.samples_is, format = args.format)
