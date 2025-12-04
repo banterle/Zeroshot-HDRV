@@ -239,7 +239,7 @@ if __name__ == '__main__':
         args.data = getGlobalPath(args.data)
         train_data, filename_rec, num_frames = split_data_from_video_sdr(args_data, args.es, group=args.group, sampling = args.sampling, recs_dir = args.recs_dir, scaling = args.scale, samples_is = args.samples_is, format = args.format)
 
-    bTypeRec = isistance(filename_rec, list)
+    bTypeRec = isinstance(filename_rec, list)
 
     #representative image (most over-exposed one)
     if bTypeRec:
