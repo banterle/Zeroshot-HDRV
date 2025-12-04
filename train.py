@@ -347,9 +347,9 @@ if __name__ == '__main__':
                         npSaveImage(img_d,  name_rec + '_-2.png')
                         npSaveImage(img_u,  name_rec + '_+2.png')
                         npSaveImage(img_uu, name_rec + '_+4.png')
-                        npSaveImage(d1,  name_rec + '_d1.png')
-                        npSaveImage(d2,  name_rec + '_d2.png')
-                        npSaveImage(d3, name_rec + '_d0.png')
+                        npSaveImage(d1,     name_rec + '_d1.png')
+                        npSaveImage(d2,     name_rec + '_d2.png')
+                        npSaveImage(d3,     name_rec + '_d0.png')
                 else:
                     img_dd, img_d, img_u, img_uu, d1, d2, d3 = model.predict4(img_t)
                     if bFlag:
@@ -362,9 +362,9 @@ if __name__ == '__main__':
                     npSaveImage(img_d,  name_rec + '_-2.png')
                     npSaveImage(img_u,  name_rec + '_+2.png')
                     npSaveImage(img_uu, name_rec + '_+4.png')
-                    npSaveImage(d1,  name_rec + '_d1.png')
-                    npSaveImage(d2,  name_rec + '_d2.png')
-                    npSaveImage(d3, name_rec + '_d0.png')
+                    npSaveImage(d1,     name_rec + '_d1.png')
+                    npSaveImage(d2,     name_rec + '_d2.png')
+                    npSaveImage(d3,     name_rec + '_d0.png')
 
             best_mse = cur_loss
             ckpt = os.path.join(ckpt_dir, 'ckpt_e{}.pth'.format(epoch))
