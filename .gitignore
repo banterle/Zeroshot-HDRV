@@ -1,2 +1,6 @@
 .DS_Store
 *.pyc
+*.hdr
+*.csv
+*.png
+*.pth
