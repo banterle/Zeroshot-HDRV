@@ -45,7 +45,7 @@ if __name__ == '__main__':
     params['batch'] = 1
     params['mode'] = 4
     params['batch'] = 1
-    params['lr'] = 0.0001
+    params['lr'] = 1e-4
     params['sampling'] = -2
     params['temp'] = 1
     
