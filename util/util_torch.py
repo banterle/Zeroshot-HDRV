@@ -77,9 +77,9 @@ def torchDataAugmentation(img, j):
 
     if j < 0:
         j = 0
-    else:
-        if j > 7:
-            j = 7
+
+    if j > 7:
+        j = 7
     
     if(j == 0):
         img_out = img

@@ -212,6 +212,9 @@ if __name__ == '__main__':
     if (args.ensemble == 1) and (args.name == 'hdrv'):
         args.name = os.path.basename(args.data)
 
+        if args.name == '':
+            args.name = 'hdrv_ensemble'
+
     run_name = args.name + '_lr{0[lr]}_e{0[epochs]}_b{0[batch]}_m{0[mode]}_t{0[temp]}_s{0[sampling]}'.format(params)
 
     mkdir_s(args.runs)
@@ -244,7 +247,6 @@ if __name__ == '__main__':
     #representative image (most over-exposed one)
     if bTypeRec:
         img = npImgRead(filename_rec[0])
-        filename_rec = filename_rec[0]
     else:
         img = npImgRead(filename_rec)
 
@@ -288,11 +290,11 @@ if __name__ == '__main__':
     rec_loss_vec = []
     temp_loss_vec = []
 
-    name_rec = os.path.splitext(filename_rec)[0]
-    
-    sz_sdr = img.shape
-    img, bFlag = addBorder(img, 16)
-    img_t = getImage2Tensor(img)
+    if bTypeRec == False:
+        name_rec = os.path.splitext(filename_rec)[0]    
+        sz_sdr = img.shape
+        img, bFlag = addBorder(img, 16)
+        img_t = getImage2Tensor(img)
 
     start_epoch = 1
 
@@ -325,20 +327,44 @@ if __name__ == '__main__':
             
             if bDebug:
                 model.eval()
-                img_dd, img_d, img_u, img_uu, d1, d2, d3 = model.predict4(img_t)
-                if bFlag:
-                    img_dd = img_dd[:,0:sz_sdr[0],0:sz_sdr[1]]
-                    img_d = img_d[:,0:sz_sdr[0],0:sz_sdr[1]]
-                    img_u = img_u[:,0:sz_sdr[0],0:sz_sdr[1]]
-                    img_uu = img_uu[:,0:sz_sdr[0],0:sz_sdr[1]]
+
+                if bTypeRec:
+                    for name in filename_rec:
+                        img = npImgRead(name)
+                        name_rec = os.path.splitext(name)[0]    
+                        sz_sdr = img.shape
+                        img, bFlag = addBorder(img, 16)
                     
-                npSaveImage(img_dd, name_rec + '_-4.png')
-                npSaveImage(img_d,  name_rec + '_-2.png')
-                npSaveImage(img_u,  name_rec + '_+2.png')
-                npSaveImage(img_uu, name_rec + '_+4.png')
-                npSaveImage(d1,  name_rec + '_d1.png')
-                npSaveImage(d2,  name_rec + '_d2.png')
-                npSaveImage(d3, name_rec + '_d0.png')
+                        img_t = getImage2Tensor(img)
+                        img_dd, img_d, img_u, img_uu, d1, d2, d3 = model.predict4(img_t)
+                        if bFlag:
+                            img_dd = img_dd[:,0:sz_sdr[0],0:sz_sdr[1]]
+                            img_d = img_d[:,0:sz_sdr[0],0:sz_sdr[1]]
+                            img_u = img_u[:,0:sz_sdr[0],0:sz_sdr[1]]
+                            img_uu = img_uu[:,0:sz_sdr[0],0:sz_sdr[1]]
+                    
+                        npSaveImage(img_dd, name_rec + '_-4.png')
+                        npSaveImage(img_d,  name_rec + '_-2.png')
+                        npSaveImage(img_u,  name_rec + '_+2.png')
+                        npSaveImage(img_uu, name_rec + '_+4.png')
+                        npSaveImage(d1,  name_rec + '_d1.png')
+                        npSaveImage(d2,  name_rec + '_d2.png')
+                        npSaveImage(d3, name_rec + '_d0.png')
+                else:
+                    img_dd, img_d, img_u, img_uu, d1, d2, d3 = model.predict4(img_t)
+                    if bFlag:
+                        img_dd = img_dd[:,0:sz_sdr[0],0:sz_sdr[1]]
+                        img_d = img_d[:,0:sz_sdr[0],0:sz_sdr[1]]
+                        img_u = img_u[:,0:sz_sdr[0],0:sz_sdr[1]]
+                        img_uu = img_uu[:,0:sz_sdr[0],0:sz_sdr[1]]
+                    
+                    npSaveImage(img_dd, name_rec + '_-4.png')
+                    npSaveImage(img_d,  name_rec + '_-2.png')
+                    npSaveImage(img_u,  name_rec + '_+2.png')
+                    npSaveImage(img_uu, name_rec + '_+4.png')
+                    npSaveImage(d1,  name_rec + '_d1.png')
+                    npSaveImage(d2,  name_rec + '_d2.png')
+                    npSaveImage(d3, name_rec + '_d0.png')
 
             best_mse = cur_loss
             ckpt = os.path.join(ckpt_dir, 'ckpt_e{}.pth'.format(epoch))
