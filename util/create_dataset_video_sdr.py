@@ -151,6 +151,7 @@ def genDataset(base_dir, args):
     video_folders_tmp = sorted(video_folders_tmp)
 
     c = 0
+    filename_rec = []
     for i in range(0, len(video_folders_tmp)):
         v = video_folders_tmp[i]
         if(v.startswith(".")):
@@ -162,7 +163,8 @@ def genDataset(base_dir, args):
             continue
         
         print(v)
-        train_data_i, filename_rec, num_frames = split_data_from_video_sdr(full_path, args.es, group=args.group, sampling = args.sampling, recs_dir = args.recs_dir, samples_is = args.samples_is)
+        train_data_i, filename_rec_i, num_frames = split_data_from_video_sdr(full_path, args.es, group=args.group, sampling = args.sampling, recs_dir = args.recs_dir, samples_is = args.samples_is)
+        filename_rec.append(filename_rec_i)
             
         if c == 0:
             train_data = train_data_i

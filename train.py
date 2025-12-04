@@ -208,6 +208,10 @@ if __name__ == '__main__':
 
     ### Prepare run dir
     params = vars(args)
+
+    if (args.ensemble == 1) and (args.name == 'hdrv'):
+        args.name = os.path.basename(args.data)
+
     run_name = args.name + '_lr{0[lr]}_e{0[epochs]}_b{0[batch]}_m{0[mode]}_t{0[temp]}_s{0[sampling]}'.format(params)
 
     mkdir_s(args.runs)
@@ -230,14 +234,20 @@ if __name__ == '__main__':
     args_data = args.data
     if args.ensemble == 1:
         #training multiple videos at the same time
-        tr0, filename_rec = genDataset(args.data, args)
+        train_data, filename_rec = genDataset(args.data, args)
     else:
         args.data = getGlobalPath(args.data)
         train_data, filename_rec, num_frames = split_data_from_video_sdr(args_data, args.es, group=args.group, sampling = args.sampling, recs_dir = args.recs_dir, scaling = args.scale, samples_is = args.samples_is, format = args.format)
 
+    bTypeRec = isistance(filename_rec, list)
 
     #representative image (most over-exposed one)
-    img = npImgRead(filename_rec)
+    if bTypeRec:
+        img = npImgRead(filename_rec[0])
+        filename_rec = filename_rec[0]
+    else:
+        img = npImgRead(filename_rec)
+
     num_pixels = img.shape[0] * img.shape[1]
 
     bTemporal = (args.temp > 0)
