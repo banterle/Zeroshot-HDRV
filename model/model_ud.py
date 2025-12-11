@@ -260,17 +260,17 @@ class UNetUD(nn.Module):
             elif (self.mode == 4):
                 d1 = self.fD(img)
 
-                #d1[d1<self.exposure_inv_gamma] = self.exposure_inv_gamma
-                img_d = img * d1
+                d1[d1<self.exposure_inv_gamma] = self.exposure_inv_gamma
+                img_d = torch.clamp(img * d1, 0.0, 1.0)
                                 
                 d2 = self.fD(img_d)
-                #d2[d2<self.exposure_inv_gamma] = self.exposure_inv_gamma
-                img_dd = img_d * d2
+                d2[d2<self.exposure_inv_gamma] = self.exposure_inv_gamma
+                img_dd = torch.clamp(img_d * d2, 0.0, 1.0)
             
                 img_u = torch.clamp(img / (d1 + self.min_val), 0.0, 1.0)
                 
                 d3 = self.fD(img_u)
-                #d3[d3<self.exposure_inv_gamma] = self.exposure_inv_gamma
+                d3[d3<self.exposure_inv_gamma] = self.exposure_inv_gamma
                 img_uu = torch.clamp(img_u / (d3 + self.min_val), 0.0, 1.0)
               
             if bTiming:
