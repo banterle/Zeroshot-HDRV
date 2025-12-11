@@ -39,6 +39,8 @@ class SDRDataset(Dataset):
         self.patchSize = patchSize
         self.bTemporal = temporal
 
+        self.limit = np.power(1.0 / np.power(2.0, expo_shift), 1.0/2.2)
+
         if area == -1:
             self.numPatches = 4
         else:
@@ -110,8 +112,8 @@ class SDRDataset(Dataset):
             
                 tmp = img_sdr[:,y:(y+self.patchSize),x:(x+self.patchSize)]
 
-                avg = torchLearningPercentage(tmp, self.expo_shift).item()
-                bFlag = (avg < 0.3) or np.isnan(avg)
+                avg = torchLearningPercentage(tmp, self.expo_shift)
+                bFlag = (avg < 0.1) or np.isnan(avg)
 
                 if bFlag:
                     if avg > bestAvg:
@@ -128,6 +130,7 @@ class SDRDataset(Dataset):
                 count += 1
 
             #torchSaveImage(img_sdr[:,y:(y+self.patchSize), x:(x+self.patchSize)], 'epoch_' + str(self.epoch) + '_patch_'+str(index)+'_lp_'+str(avg)+'_'+str(count)+'.png')
+            #torchSaveImage(mask, 'mepoch_' + str(self.epoch) + '_patch_'+str(index)+'_lp_'+str(avg)+'_'+str(count)+'.png')
 
             img_sdr = img_sdr[:,y:(y+self.patchSize), x:(x+self.patchSize)]
             if self.bTemporal:

@@ -49,7 +49,7 @@ def torchLearningPercentage(frame, expo_shift = 2.0, scaling = 1.0):
     upper_limit = 1.0 - min_val
     lower_limit = thr + min_val
     mask = torch.where((delta > lower_limit) & (delta < upper_limit), 1.0, mask)
-    return torch.mean(mask)
+    return torch.mean(mask).item()
 
 #
 #
