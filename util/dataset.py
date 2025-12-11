@@ -39,8 +39,6 @@ class SDRDataset(Dataset):
         self.patchSize = patchSize
         self.bTemporal = temporal
 
-        self.limit = np.power(1.0 / np.power(2.0, expo_shift), 1.0/2.2)
-
         if area == -1:
             self.numPatches = 4
         else:
@@ -121,7 +119,7 @@ class SDRDataset(Dataset):
                         yb = y
                         bestAvg = avg
 
-                if count >= 100:
+                if count >= 16:
                     #print('Fail: ' + str([xb,yb, bestAvg]))
                     x = xb
                     y = yb
