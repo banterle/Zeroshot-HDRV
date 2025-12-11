@@ -92,8 +92,7 @@ class UNet(nn.Module):
             self.w = 1.0
             self.sigma = 0.15
                 
-        #r = [64, 128, 256, 512, 512]
-        r = [32, 64, 128, 256, 256]
+        r = [64, 128, 256, 512, 512]
 
         self.d0 = UDown(n_input, r[0], True) #512x512
         self.d1 = UDown(r[0], r[1])          #256x256
