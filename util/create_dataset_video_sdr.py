@@ -88,7 +88,7 @@ def split_data_from_video_sdr(data_dir, expo_shift = 2.0, group=None, sampling =
             frames_next_str.append(tmp_file_name_next)#os.path.join(data_dir, tmp_file_name_next))
             lst2.append(i)
             if debug:
-                npSaveImage(frame, 'images_' + str(i) + '.jpg')
+                npSaveImage(frame, 'images_' + str(i) + '.png')
         
         del frame
         frame = None
@@ -152,6 +152,8 @@ def genDataset(base_dir, args):
 
     c = 0
     filename_rec = []
+    train_data = []
+
     for i in range(0, len(video_folders_tmp)):
         v = video_folders_tmp[i]
         if(v.startswith(".")):
