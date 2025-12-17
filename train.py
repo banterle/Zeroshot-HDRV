@@ -346,9 +346,11 @@ if __name__ == '__main__':
                         npSaveImage(img_d,          name_rec + '_-2.png')
                         npSaveImage(img_u,          name_rec + '_+2.png')
                         npSaveImage(img_uu,         name_rec + '_+4.png')
-                        npSaveImage(delta_img,      name_rec + '_delta_img.png')
-                        npSaveImage(delta_img_d,    name_rec + '_delta_img_d.png')
-                        npSaveImage(delta_img_u,    name_rec + '_delta_img_u.png')
+
+                        if not (delta_img == None):
+                            npSaveImage(delta_img,      name_rec + '_delta_img.png')
+                            npSaveImage(delta_img_d,    name_rec + '_delta_img_d.png')
+                            npSaveImage(delta_img_u,    name_rec + '_delta_img_u.png')
                 else:
                     img_dd, img_d, img_u, img_uu, delta_img, delta_img_d, delta_img_u = model.predict4(img_t)
                     if bFlag:
@@ -361,9 +363,11 @@ if __name__ == '__main__':
                     npSaveImage(img_d,       name_rec + '_-2.png')
                     npSaveImage(img_u,       name_rec + '_+2.png')
                     npSaveImage(img_uu,      name_rec + '_+4.png')
-                    npSaveImage(delta_img,   name_rec + '_delta_img.png')
-                    npSaveImage(delta_img_d, name_rec + '_delta_img_d.png')
-                    npSaveImage(delta_img_u, name_rec + '_delta_img_u.png')
+
+                    if not (delta_img == None):
+                        npSaveImage(delta_img,   name_rec + '_delta_img.png')
+                        npSaveImage(delta_img_d, name_rec + '_delta_img_d.png')
+                        npSaveImage(delta_img_u, name_rec + '_delta_img_u.png')
 
             best_mse = cur_loss
             ckpt = os.path.join(ckpt_dir, 'ckpt_e{}.pth'.format(epoch))

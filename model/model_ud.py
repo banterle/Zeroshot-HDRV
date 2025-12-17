@@ -284,18 +284,23 @@ class UNetUD(nn.Module):
             img_d = img_d[:,:,0:sz_ori[2],0:sz_ori[3]]
             img_dd = img_dd[:,:,0:sz_ori[2],0:sz_ori[3]]
 
-            delta_img = delta_img[:,:,0:sz_ori[2],0:sz_ori[3]]
-            delta_img_d = delta_img_d[:,:,0:sz_ori[2],0:sz_ori[3]]
-            delta_img_u = delta_img_u[:,:,0:sz_ori[2],0:sz_ori[3]]
-
             img_u = img_u.data.cpu().numpy().squeeze()
             img_uu = img_uu.data.cpu().numpy().squeeze()
             img_d = img_d.data.cpu().numpy().squeeze()
             img_dd = img_dd.data.cpu().numpy().squeeze()
 
-            delta_img = delta_img.data.cpu().numpy().squeeze()
-            delta_img_d = delta_img_d.data.cpu().numpy().squeeze()
-            delta_img_u = delta_img_u.data.cpu().numpy().squeeze()
+            if  (self.mode == 2) or  (self.mode == 4):
+                delta_img = delta_img[:,:,0:sz_ori[2],0:sz_ori[3]]
+                delta_img_d = delta_img_d[:,:,0:sz_ori[2],0:sz_ori[3]]
+                delta_img_u = delta_img_u[:,:,0:sz_ori[2],0:sz_ori[3]]
+                delta_img = delta_img.data.cpu().numpy().squeeze()
+                delta_img_d = delta_img_d.data.cpu().numpy().squeeze()
+                delta_img_u = delta_img_u.data.cpu().numpy().squeeze()
+            else:
+                delta_img = None
+                delta_img_d = None
+                delta_img_u = None
+                
 
         if bTiming:
             t_total = t_end - t_start

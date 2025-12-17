@@ -86,7 +86,7 @@ class SDRDataset(Dataset):
                 index_t = sample.Group
 
         if self.bRandom:
-                shift = random.random() * 0.25
+            shift = random.random() * 0.25
         else:
             shift = sample.Shift
             
