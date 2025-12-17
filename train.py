@@ -335,6 +335,7 @@ if __name__ == '__main__':
                     
                         img_t = getImage2Tensor(img)
                         img_dd, img_d, img_u, img_uu, delta_img, delta_img_d, delta_img_u = model.predict4(img_t)
+
                         if bFlag:
                             img_dd = img_dd[:,0:sz_sdr[0],0:sz_sdr[1]]
                             img_d = img_d[:,0:sz_sdr[0],0:sz_sdr[1]]
@@ -345,9 +346,9 @@ if __name__ == '__main__':
                         npSaveImage(img_d,          name_rec + '_-2.png')
                         npSaveImage(img_u,          name_rec + '_+2.png')
                         npSaveImage(img_uu,         name_rec + '_+4.png')
-                        npSaveImage(delta_img,      name_rec + '_d1.png')
-                        npSaveImage(delta_img_d,    name_rec + '_d2.png')
-                        npSaveImage(delta_img_u,    name_rec + '_d0.png')
+                        npSaveImage(delta_img,      name_rec + '_delta_img.png')
+                        npSaveImage(delta_img_d,    name_rec + '_delta_img_d.png')
+                        npSaveImage(delta_img_u,    name_rec + '_delta_img_u.png')
                 else:
                     img_dd, img_d, img_u, img_uu, delta_img, delta_img_d, delta_img_u = model.predict4(img_t)
                     if bFlag:
