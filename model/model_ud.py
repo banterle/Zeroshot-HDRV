@@ -258,20 +258,22 @@ class UNetUD(nn.Module):
                 img_uu = self.fU(img_u)
                                 
             elif (self.mode == 4):
-                d1 = self.fD(img)
-
-                d1[d1<self.exposure_inv_gamma] = self.exposure_inv_gamma
-                img_d = torch.clamp(img * d1, 0.0, 1.0)
+                #exposure down
+                delta_img = self.fD(img)
+                delta_img[delta_img<self.exposure_inv_gamma] = self.exposure_inv_gamma
+                img_d = torch.clamp(img * delta_img, 0.0, 1.0)
                                 
-                d2 = self.fD(img_d)
-                d2[d2<self.exposure_inv_gamma] = self.exposure_inv_gamma
-                img_dd = torch.clamp(img_d * d2, 0.0, 1.0)
+                #exposure down down
+                delta_img_d = self.fD(img_d)
+                delta_img_d[delta_img_d<self.exposure_inv_gamma] = self.exposure_inv_gamma
+                img_dd = torch.clamp(img_d * delta_img_d, 0.0, 1.0)
             
-                img_u = torch.clamp(img / (d1 + self.min_val), 0.0, 1.0)
+                #exposure up
+                img_u = torch.clamp(img / (delta_img + self.min_val), 0.0, 1.0)
                 
-                d3 = self.fD(img_u)
-                d3[d3<self.exposure_inv_gamma] = self.exposure_inv_gamma
-                img_uu = torch.clamp(img_u / (d3 + self.min_val), 0.0, 1.0)
+                delta_img_u = self.fD(img_u)
+                delta_img_u[delta_img_u<self.exposure_inv_gamma] = self.exposure_inv_gamma
+                img_uu = torch.clamp(img_u / (delta_img_u + self.min_val), 0.0, 1.0)
               
             if bTiming:
                 t_end = time.time();
@@ -282,20 +284,21 @@ class UNetUD(nn.Module):
             img_d = img_d[:,:,0:sz_ori[2],0:sz_ori[3]]
             img_dd = img_dd[:,:,0:sz_ori[2],0:sz_ori[3]]
 
-            d1 = d1[:,:,0:sz_ori[2],0:sz_ori[3]]
-            d2 = d2[:,:,0:sz_ori[2],0:sz_ori[3]]
-            d3 = d3[:,:,0:sz_ori[2],0:sz_ori[3]]
+            delta_img = delta_img[:,:,0:sz_ori[2],0:sz_ori[3]]
+            delta_img_d = delta_img_d[:,:,0:sz_ori[2],0:sz_ori[3]]
+            delta_img_u = delta_img_u[:,:,0:sz_ori[2],0:sz_ori[3]]
 
             img_u = img_u.data.cpu().numpy().squeeze()
             img_uu = img_uu.data.cpu().numpy().squeeze()
             img_d = img_d.data.cpu().numpy().squeeze()
             img_dd = img_dd.data.cpu().numpy().squeeze()
-            d1 = d1.data.cpu().numpy().squeeze()
-            d2 = d2.data.cpu().numpy().squeeze()
-            d3 = d3.data.cpu().numpy().squeeze()
+
+            delta_img = delta_img.data.cpu().numpy().squeeze()
+            delta_img_d = delta_img_d.data.cpu().numpy().squeeze()
+            delta_img_u = delta_img_u.data.cpu().numpy().squeeze()
 
         if bTiming:
             t_total = t_end - t_start
             print('Timing: ' + str(t_total))
             
-        return img_dd, img_d, img_u, img_uu, d1, d2, d3
+        return img_dd, img_d, img_u, img_uu, delta_img, delta_img_d, delta_img_u
