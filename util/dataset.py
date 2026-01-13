@@ -95,7 +95,7 @@ class SDRDataset(Dataset):
         if self.bTemporal:
             img_sdr_n = self.read_img(sample.Next, index_t, self.group) * self.scale
                     
-        if (self.patchSize <= img_sdr.shape[1]) and (self.patchSize <= img_sdr.shape[2]):
+        if (self.patchSize < img_sdr.shape[1]) or (self.patchSize < img_sdr.shape[2]):
             limit_y = img_sdr.shape[1] - self.patchSize - 1
             limit_x = img_sdr.shape[2] - self.patchSize - 1
             bestAvg = 0.0
@@ -131,12 +131,13 @@ class SDRDataset(Dataset):
             #torchSaveImage(mask, 'mepoch_' + str(self.epoch) + '_patch_'+str(index)+'_lp_'+str(avg)+'_'+str(count)+'.png')
 
             img_sdr = img_sdr[:,y:(y+self.patchSize), x:(x+self.patchSize)]
+
             if self.bTemporal:
                 img_sdr_n = img_sdr_n[:,y:(y+self.patchSize),x:(x+self.patchSize)]
         
         o0 = torchRound8(torchChangeExposure(img_sdr, shift, 2.2))
         f0 = torchRound8(torchChangeExposure(img_sdr, shift + self.expo_shift, 2.2))
-
+        
         if self.bTemporal:
             o0_n = torchRound8(torchChangeExposure(img_sdr_n, shift, 2.2))
             f0_n = torchRound8(torchChangeExposure(img_sdr_n, shift + self.expo_shift, 2.2))
