@@ -50,9 +50,10 @@ def train(epoch, loader, model, optimizer, args, scheduler = None):
     optimizer.zero_grad()
   
     #mode 2 and 4
-    gc.collect()
+    #gc.collect()
 
     for f0, o0, o0_n, f0_n in progress:
+
         if torch.cuda.is_available():
             f0 = f0.cuda()
             o0 = o0.cuda()
@@ -253,7 +254,7 @@ if __name__ == '__main__':
     bTemporal = (args.temp > 0)
     train_data = SDRDataset(train_data, group = args.group, expo_shift = args.es, scale = args.scale, area = num_pixels, temporal = bTemporal)
     
-    train_loader = DataLoader(train_data,  batch_size=args.batch, shuffle=True, num_workers=8, pin_memory=True)
+    train_loader = DataLoader(train_data,  batch_size=args.batch, shuffle=True, num_workers=8, pin_memory=True, persistent_workers = True)
 
     #
     #create the model

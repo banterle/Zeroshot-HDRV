@@ -33,7 +33,10 @@ class UNetUD(nn.Module):
 
         self.min_val = 0.25 / 255
 
-        self.bUNet = (mode == 0)
+        self.bUNet = (mode <= 1)
+
+        if self.bUNet:
+            print("Two networks mode")
         
         self.bCuda = torch.cuda.is_available()      
  
