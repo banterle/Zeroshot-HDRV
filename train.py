@@ -365,7 +365,7 @@ if __name__ == '__main__':
                     npSaveImage(img_u,       name_rec + '_+2.png')
                     npSaveImage(img_uu,      name_rec + '_+4.png')
 
-                    if not (delta_img == None):
+                    if not (delta_img is None):
                         npSaveImage(delta_img,   name_rec + '_delta_img.png')
                         npSaveImage(delta_img_d, name_rec + '_delta_img_d.png')
                         npSaveImage(delta_img_u, name_rec + '_delta_img_u.png')

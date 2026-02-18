@@ -8,6 +8,7 @@
 
 import os
 import sys
+import math
 import torch
 import random
 from torch.utils.data import Dataset
@@ -42,7 +43,7 @@ class SDRDataset(Dataset):
         if area == -1:
             self.numPatches = 4
         else:
-            self.numPatches = area // (2 * self.patchSize * self.patchSize)
+            self.numPatches = math.ceil(area // (self.patchSize * self.patchSize))
             if self.numPatches <= 0:
                 self.numPatches = 1
 
