@@ -24,6 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('--already_trained', type=str, default ='False', help='was the network already trained?')
     parser.add_argument('--n_exp_down', type=int, default = 2, help='the number of exposures to generate down (under-exposed)')
     parser.add_argument('--n_exp_up', type=int, default = 2, help='the number of exposures to generate up (over-exposed)')
+    parser.add_argument('--train_only', type=str, default = 'False', help='do we train without prediction? (default is False)')
 
     args = parser.parse_args()
 
@@ -49,13 +50,14 @@ if __name__ == '__main__':
     params['sampling'] = -2
     params['temp'] = 1
     
-    if args.data_type == 'image':
+    if 'image' in args.data_type:
         params['sampling'] = 1
         params['temp'] = 0
 
     print(args.already_trained)
-    if args.already_trained == 'False':
-        if args.data_type == 'video':
+
+    if 'False' in args.already_trained:
+        if 'video' in args.data_type:
             #is this video a folder or a .mp4 file?
             video_str = os.path.splitext(data_path)[1].lower()
             if video_str == '.mp4' or video_str == '.mov':
@@ -65,24 +67,26 @@ if __name__ == '__main__':
             data_path = os.path.splitext(data_path)[0]
             subprocess.call('python train.py ' + data_path + ' --name ' + name + ' --mode ' + str(params['mode']) + ' --epoch ' + str(params['epochs']) + ' --format .png', shell=True)
             params['temp'] = 1
-        elif args.data_type == 'image':
+
+        elif 'image' in args.data_type:
             subprocess.call('python train.py ' + data_path + ' --name ' + name + ' --mode ' + str(params['mode']) + ' --sampling 1 --temp 0' + ' --format .png', shell=True)
             params['temp'] = 0
             params['sampling'] = 1
 
-    lin_fun = 'sRGB'
-    
-    if args.data_type == 'video':
-        result = getColorSpaceInfo(data_path)
-        if ('bt470bg' in result) or ('unknown' in result):
-            lin_fun = 'gamma_2.2'
+    if 'False' in args.train_only:
+        #CRF function for linearization
+        lin_fun = 'sRGB'    
+        if 'video' in args.data_type:
+            result = getColorSpaceInfo(data_path)
+            if ('bt470bg' in result) or ('unknown' in result):
+                lin_fun = 'gamma_2.2'
 
-    run_name = name + '_lr{0[lr]}_e{0[epochs]}_b{0[batch]}_m{0[mode]}_t{0[temp]}_s{0[sampling]}'.format(params)
-    run_name = os.path.join('runs', run_name)
+        run_name = name + '_lr{0[lr]}_e{0[epochs]}_b{0[batch]}_m{0[mode]}_t{0[temp]}_s{0[sampling]}'.format(params)
+        run_name = os.path.join('runs', run_name)
 
-    print(run_name)
+        print(run_name)
     
-    output_path = os.path.join(run_name, name + '_exr')
+        output_path = os.path.join(run_name, name + '_exr')
     
-    exposures_str = ' --n_exp_down ' + str(args.n_exp_down) + ' --n_exp_up ' + str(args.n_exp_up)
-    subprocess.call('python pred.py ' + data_path + ' --model_path ' + run_name + ' --output_path ' + output_path + ' --transferfunction ' + lin_fun + exposures_str, shell=True)
+        exposures_str = ' --n_exp_down ' + str(args.n_exp_down) + ' --n_exp_up ' + str(args.n_exp_up)
+        subprocess.call('python pred.py ' + data_path + ' --model_path ' + run_name + ' --output_path ' + output_path + ' --transferfunction ' + lin_fun + exposures_str, shell=True)
