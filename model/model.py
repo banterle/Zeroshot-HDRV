@@ -17,12 +17,6 @@ from model.cropping_layer import *
 #
 #
 #
-def merge(x, y):
-    return torch.cat((x, y), 1)
-
-#
-#
-#
 class Block(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
@@ -54,13 +48,8 @@ class UDown(nn.Module):
     def forward(self, x):
         return self.down(x)
 
-#
-#
-#
 class UUp(nn.Module):
-    #
-    #
-    #
+
     def __init__(self, in_channels, out_channels, bEnd = False):
         super().__init__()
         if bEnd:
@@ -75,18 +64,12 @@ class UUp(nn.Module):
                                    Block(in_channels, out_channels),
                                    nn.Upsample(scale_factor = 2.0, mode = 'bilinear', align_corners = True)
                                 )
+    def forward(self, x):
+        return self.up(x)
 
-    #
-    #
-    #
-    def forward(self, x, x_skip = None):
-
-        if x_skip == None: 
-            y = x
-        else:
-            y = merge(x, x_skip)
-
-        return self.up(y)
+def merge(x, y):
+    return torch.cat((x, y), 1)
+    
               
 #
 #Network
@@ -119,7 +102,6 @@ class UNet(nn.Module):
        
         if bFull:
             self.d4 = UDown(r[3], r[4])
-
             self.u4 = UUp(r[4], r[3])
             self.u3 = UUp(2 * r[3], r[2])
         else:
@@ -138,25 +120,29 @@ class UNet(nn.Module):
     #
     #
     #
-    def forward(self, v_input, mask = None):   
-        od0 = self.d0(v_input)      #256x256
-        od1 = self.d1(od0)          #128x128
-        od2 = self.d2(od1)          #64x64
-        od3 = self.d3(od2)          #32x32
-        
+    def forward(self, v_input, mask = None):    
+
+        o0 = self.d0(v_input)
+        o1 = self.d1(o0)
+        o2 = self.d2(o1)
+        o3 = self.d3(o2)
+
+        #32x32
         if self.bFull:
-            od4 = self.d4(od3)      #16x16
-
-            ou4 = self.u4(od4)      #32x32
-            ou3 = self.u3(u4, od3)  #64x64
+            o4 = self.d4(o3)
+            u4 = self.u4(o4)
+            o3 = Crop2D(o3, u4)
+            u3 = self.u3(merge(u4, o3))
         else:
-            ou3 = self.u3(od3)      #64x64
+            u3 = self.u3(o3)
                     
-        ou2 = self.u2(ou3, od2)     #128x128
-        ou1 = self.u1(ou2, od1)     #256x256
-        ou0 = self.u0(ou1, od0)     #512x512
-
-        #if not self.training:
-        #    u0 = u0.clamp(0.0, 1.0)
+        o2 = Crop2D(o2, u3)
+        u2 = self.u2(merge(u3, o2))
+        
+        o1 = Crop2D(o1, u2)
+        u1 = self.u1(merge(u2, o1))
+        
+        o0 = Crop2D(o0, u1)
+        u0 = self.u0(merge(u1, o0))
                                   
-        return ou0
+        return u0
