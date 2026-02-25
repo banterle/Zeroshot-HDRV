@@ -65,14 +65,14 @@ if __name__ == '__main__':
                 subprocess.call('python video2png.py ' + data_path, shell=True)
                     
             data_path = os.path.splitext(data_path)[0]
-            subprocess.call('python train.py ' + data_path + ' --name ' + name + ' --mode ' + str(params['mode']) + ' --epoch ' + str(params['epochs']) + ' --format .png', shell=True)
+            subprocess.call('python train.py ' + data_path + ' --name ' + name + ' --mode ' + str(params['mode']) + ' --epochs ' + str(params['epochs']) + ' --format .png', shell=True)
             params['temp'] = 1
 
         elif 'image' in args.data_type:
-            subprocess.call('python train.py ' + data_path + ' --name ' + name + ' --mode ' + str(params['mode']) + ' --sampling 1 --temp 0' + ' --format .png', shell=True)
+            subprocess.call('python train.py ' + data_path + ' --name ' + name + ' --mode ' + str(params['mode']) + ' --epochs ' + str(params['epochs']) + ' --sampling 1 --temp 0' + ' --format .png', shell=True)
             params['temp'] = 0
             params['sampling'] = 1
-
+ 
     if 'False' in args.train_only:
         #CRF function for linearization
         lin_fun = 'sRGB'    
