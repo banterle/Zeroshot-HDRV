@@ -14,13 +14,17 @@ import subprocess
 #
 #
 def getColorSpaceInfo(fn):
-    exec_str = 'ffprobe -v error -select_streams v:0 -show_entries stream=color_space -of default=noprint_wrappers=1 \"' + fn + '\"'
+    video_str = os.path.splitext(fn)[1].lower()
+    if video_str == '.mp4' or video_str == '.mov':
+        exec_str = 'ffprobe -v error -select_streams v:0 -show_entries stream=color_space -of default=noprint_wrappers=1 \"' + fn + '\"'
 
-    p = subprocess.Popen(exec_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout_out, stderr_out = p.communicate()
-    rc = p.poll()
-    subprocess.call(exec_str, shell=True)
-    return str(stdout_out)
+        p = subprocess.Popen(exec_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout_out, stderr_out = p.communicate()
+        rc = p.poll()
+        subprocess.call(exec_str, shell=True)
+        return str(stdout_out)
+    else:
+        return 'bt709'
 
 #
 #
