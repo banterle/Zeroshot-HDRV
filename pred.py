@@ -7,6 +7,7 @@
 #
 
 import os
+import sys
 import argparse
 import numpy as np
 from torchvision.transforms.functional import to_tensor
@@ -44,7 +45,7 @@ def buildHDRFromNet(model, frame_np, bDownOnly = False, transferfunction = 'gamm
     stack, stack_exposure = model.predict(frame_torch, n_exp_down, n_exp_up)
 
     if 'gamma_' in transferfunction:
-        lin_type = 'gamma_'
+        lin_type = 'gamma'
         try:
             lin_fun = float(transferfunction.replace('gamma_', ' '))
             if lin_fun <= 0.0:
@@ -99,13 +100,11 @@ def evalFolder(args, bWrite = True, bVideo = False):
         if True:
             #get the current frame
             success, fn, frame = v.getNextFrame(True, i)
-            
             sz_sdr = frame.shape
             #frame, bFlag = addBorder(frame, 16)
             
             #expand the frame and build an HDR frame
             img_hdr, sz = buildHDRFromNet(model, frame * args.scale, False, args.transferfunction, n_exp_down = args.n_exp_down, n_exp_up = args.n_exp_up)
-            
             #if bFlag:
             #    img_hdr = img_hdr[0:sz_sdr[0],0:sz_sdr[1],:]
             
