@@ -127,10 +127,10 @@ def removeSRGB(x):
 #
 def removeCRF(img, lin_type='gamma', lin_fun=2.2):
 
-    if lin_type == 'gamma':
+    if 'gamma' in lin_type:
         img = np.power(img, lin_fun)
         
-    if lin_type == 'sRGB':
+    if 'sRGB' in lin_type:
         img = np.vectorize(removeSRGB)(img)
 
     return img
