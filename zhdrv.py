@@ -54,7 +54,7 @@ if __name__ == '__main__':
         params['sampling'] = 1
         params['temp'] = 0
 
-    print(args.already_trained)
+    print('Is already trained? ' + str(args.already_trained))
 
     if 'False' in args.already_trained:
         if 'video' in args.data_type:
