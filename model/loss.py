@@ -11,13 +11,13 @@ import torch.nn.functional as F
 #
 #
 #
-def lossColor(img_rec, img, alpha = 5):
+def lossColor(img_rec, img):
     loss_col = 1.0 - F.cosine_similarity(img_rec, img, dim = 1, eps = 1e-20)
-    return alpha * loss_col.mean()
+    return loss_col.mean()
 
 #
 #
 #
-def lossL1C(img_rec, img):
-    loss_sig_asia = F.l1_loss(img_rec, img) + 4 * lossColor(img_rec, img)
+def lossL1C(img_rec, img, alpha = 5.0):
+    loss_sig_asia = F.l1_loss(img_rec, img) + alpha * lossColor(img_rec, img)
     return loss_sig_asia
