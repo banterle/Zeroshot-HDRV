@@ -314,7 +314,7 @@ if __name__ == '__main__':
             metrics = {'mse': float(cur_loss)}
             metrics['epoch'] = int(epoch)
 
-            log = log._append(metrics, ignore_index=True)
+            log = log.append(metrics, ignore_index=True)
             log.to_csv(log_file, index=False)
 
         if (best_mse is None) or (cur_loss < best_mse) or (epoch == args.epochs):
