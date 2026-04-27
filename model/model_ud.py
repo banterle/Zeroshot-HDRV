@@ -75,7 +75,8 @@ class UNetUD(nn.Module):
                 ckpt = torch.load(ckpt_str, map_location=torch.device('cpu'))
         else:
             ckpt_dir = os.path.join(ckpt_str, 'ckpt')
-            ckpts = glob2.glob(os.path.join(ckpt_dir, '*.pth'))
+
+            ckpts = sorted([f for f in os.listdir(ckpt_dir) if f.lower().endswith('.pth')])
 
             def get_epoch(ckpt_url):
                 s = re.findall("ckpt_e(\\d+).pth", ckpt_url)

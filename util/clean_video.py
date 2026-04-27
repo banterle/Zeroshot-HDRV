@@ -10,6 +10,9 @@ import os
 import random
 
 import numpy as np
+
+import matplotlib
+matplotlib.use('Agg')
 import seaborn as sns
 import matplotlib.pyplot as plt
 
