@@ -48,7 +48,7 @@ def cleanSequenceRegularSamplingWithJittering(n, fq = 6):
 #
 #  cleanSequenceWithUniformSampling
 #
-def cleanSequenceWithUniformSampling(video_obj, nSamples, expo_shift = 2.0, scaling = 1.0, bDebug = True):
+def cleanSequenceWithUniformSampling(video_obj, nSamples, expo_shift = 2.0, scaling = 1.0, bDebug = False):
     
     frames_oe = []
     n = video_obj.n
