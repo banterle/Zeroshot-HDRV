@@ -15,6 +15,44 @@ import numpy as np
 #
 #
 #
+def save_distribution(frames_oe, output_path="frames_oe.png", bins=32, dpi=300):
+    frames_oe = np.asarray(frames_oe)
+    frames_oe = frames_oe[np.isfinite(frames_oe)]
+
+    if frames_oe.size == 0:
+        return
+
+    fig, ax = plt.subplots()
+
+    #compute histogram
+    ax.hist(frames_oe, bins=bins, density=True, alpha=0.4, edgecolor="black")
+
+    x = np.linspace(frames_oe.min(), frames_oe.max(), 500)
+    n = frames_oe.size
+    std = frames_oe.std(ddof=1)
+
+    if n > 1 and std > 0:
+        bandwidth = 1.06 * std * n ** (-1 / 5)
+
+        kernels = np.exp(-0.5 * ((x[:, None] - frames_oe[None, :]) / bandwidth) ** 2)
+        kde = kernels.sum(axis=1) / (n * bandwidth * np.sqrt(2 * np.pi))
+
+        ax.plot(x, kde, linewidth=2)
+
+    #plot
+    _, ymax = ax.get_ylim()
+    ax.vlines(frames_oe, 0, ymax * 0.03, linewidth=0.8)
+
+    ax.set_xlabel("frames_oe")
+    ax.set_ylabel("Density")
+
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=dpi, bbox_inches="tight")
+    plt.close(fig)
+
+#
+#
+#
 def plotGraph(array1, array2 = [], array3 = [], folder = '.', plot_name = 'plot.png'):
     # plot
     fig = plt.figure(figsize=(10, 4))

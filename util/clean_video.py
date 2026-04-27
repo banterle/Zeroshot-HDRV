@@ -11,11 +11,7 @@ import random
 
 import numpy as np
 
-import matplotlib
-matplotlib.use('Agg')
-import seaborn as sns
-import matplotlib.pyplot as plt
-
+from util.graph import *
 from util.util_io import *
 from util.video_sdr import *
 from util.distribution1D import *
@@ -66,8 +62,7 @@ def cleanSequenceWithUniformSampling(video_obj, nSamples, expo_shift = 2.0, scal
     frames_vec = []
 
     if bDebug:
-        sns.distplot(frames_oe, kde=True, rug=True, bins=32)
-        plt.savefig('hist_oe.png')
+        save_distribution(frames_oe, 'hist_oe.png')
 
     if nSamples > n:
         nSamples = n
