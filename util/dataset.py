@@ -11,9 +11,13 @@ import sys
 import math
 import torch
 import random
+
 from torch.utils.data import Dataset
+from torchvision import transforms
 from torchvision.transforms.functional import to_tensor
+
 import numpy as np
+
 from util.clean_video import *
 from util.video_sdr import *
 from util.util_io import *
@@ -40,6 +44,8 @@ class SDRDataset(Dataset):
         self.patchSize = patchSize
         self.bTemporal = temporal
 
+        self.bPatches = False
+
         if area == -1:
             self.numPatches = 4
         else:
@@ -49,6 +55,9 @@ class SDRDataset(Dataset):
 
         print('Number of patches: ' + str(self.numPatches))
             
+
+        self.transform = transforms.Resize((320, 320))
+
         if bRandom:
             random.seed(42)
         
@@ -95,47 +104,87 @@ class SDRDataset(Dataset):
 
         if self.bTemporal:
             img_sdr_n = self.read_img(sample.Next, index_t, self.group) * self.scale
-                    
-        if (self.patchSize < img_sdr.shape[1]) or (self.patchSize < img_sdr.shape[2]):
-            limit_y = img_sdr.shape[1] - self.patchSize - 1
-            limit_x = img_sdr.shape[2] - self.patchSize - 1
-            bestAvg = 0.0
-            xb = -1
-            yb = -1
-            bFlag = True
-            count = 0
-
-            while bFlag:
-                x = int(np.round(np.random.rand() * limit_x))
-                y = int(np.round(np.random.rand() * limit_y))
             
-                tmp = img_sdr[:,y:(y+self.patchSize),x:(x+self.patchSize)]
+        if self.bPatches:
+            if (self.patchSize < img_sdr.shape[1]) or (self.patchSize < img_sdr.shape[2]):
+                limit_y = img_sdr.shape[1] - self.patchSize - 1
+                limit_x = img_sdr.shape[2] - self.patchSize - 1
+                bestAvg = 0.0
+                xb = -1
+                yb = -1
+                bFlag = True
+                count = 0
 
-                avg = torchLearningPercentage(tmp, self.expo_shift)
-                bFlag = (avg < 0.1) or np.isnan(avg)
+                while bFlag:
+                    x = int(np.round(np.random.rand() * limit_x))
+                    y = int(np.round(np.random.rand() * limit_y))
+            
+                    tmp = img_sdr[:,y:(y+self.patchSize),x:(x+self.patchSize)]
 
-                if bFlag:
-                    if avg > bestAvg:
-                        xb = x
-                        yb = y
-                        bestAvg = avg
+                    avg = torchLearningPercentage(tmp, self.expo_shift)
+                    bFlag = (avg < 0.1) or np.isnan(avg)
 
-                if count >= 16:
-                    #print('Fail: ' + str([xb,yb, bestAvg]))
-                    x = xb
-                    y = yb
-                    avg = bestAvg
-                    bFlag = False            
-                count += 1
+                    if bFlag:
+                        if avg > bestAvg:
+                            xb = x
+                            yb = y
+                            bestAvg = avg
 
-            #torchSaveImage(img_sdr[:,y:(y+self.patchSize), x:(x+self.patchSize)], 'epoch_' + str(self.epoch) + '_patch_'+str(index)+'_lp_'+str(avg)+'_'+str(count)+'.png')
-            #torchSaveImage(mask, 'mepoch_' + str(self.epoch) + '_patch_'+str(index)+'_lp_'+str(avg)+'_'+str(count)+'.png')
+                    if count >= 16:
+                        #print('Fail: ' + str([xb,yb, bestAvg]))
+                        x = xb
+                        y = yb
+                        avg = bestAvg
+                        bFlag = False            
+                    count += 1
 
-            img_sdr = img_sdr[:,y:(y+self.patchSize), x:(x+self.patchSize)]
+                #torchSaveImage(img_sdr[:,y:(y+self.patchSize), x:(x+self.patchSize)], 'epoch_' + str(self.epoch) + '_patch_'+str(index)+'_lp_'+str(avg)+'_'+str(count)+'.png')
+                #torchSaveImage(mask, 'mepoch_' + str(self.epoch) + '_patch_'+str(index)+'_lp_'+str(avg)+'_'+str(count)+'.png')
 
+                img_sdr = img_sdr[:,y:(y+self.patchSize), x:(x+self.patchSize)]
+
+                if self.bTemporal:
+                    img_sdr_n = img_sdr_n[:,y:(y+self.patchSize),x:(x+self.patchSize)]
+        else:
+            area_pixels = img_sdr.shape[1] * img_sdr.shape[2]
+
+            bArea = True
+            if area_pixels > (1e6):
+                area = self.rng.random() * 0.4 + 0.2
+                area_pixels = area_pixels * area
+                len_crop = int(np.sqrt(area_pixels))
+            else:
+                len_crop = 320
+                bArea = False
+
+            limit_y = img_sdr.shape[1] - len_crop - 1
+            limit_x = img_sdr.shape[2] - len_crop - 1
+
+            if limit_x > 0:
+                x = int(np.round(np.random.rand() * limit_x))
+            else:
+                x = 0
+
+            if limit_y > 0:
+                y = int(np.round(np.random.rand() * limit_y))
+            else:
+                y = 0
+
+            img_sdr = img_sdr[:, y:(y+len_crop), x:(x+len_crop)] 
+            
             if self.bTemporal:
-                img_sdr_n = img_sdr_n[:,y:(y+self.patchSize),x:(x+self.patchSize)]
+                img_sdr_n = img_sdr_n[:,y:(y+len_crop),x:(x+len_crop)]
         
+            #
+            #Area resampling
+            #
+            if bArea:
+                img_sdr = self.transform(img_sdr)
+
+                if self.bTemporal:
+                    img_sdr_n = self.transform(img_sdr_n)
+                
+
         o0 = torchRound8(torchChangeExposure(img_sdr, shift, 2.2))
         f0 = torchRound8(torchChangeExposure(img_sdr, shift + self.expo_shift, 2.2))
         
