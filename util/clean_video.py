@@ -11,7 +11,7 @@ import random
 
 import numpy as np
 
-from util.graph import *
+from util.graphs import *
 from util.util_io import *
 from util.video_sdr import *
 from util.distribution1D import *
@@ -48,7 +48,7 @@ def cleanSequenceRegularSamplingWithJittering(n, fq = 6):
 #
 #  cleanSequenceWithUniformSampling
 #
-def cleanSequenceWithUniformSampling(video_obj, nSamples, expo_shift = 2.0, scaling = 1.0, bDebug = False):
+def cleanSequenceWithUniformSampling(video_obj, nSamples, expo_shift = 2.0, scaling = 1.0, bDebug = True):
     
     frames_oe = []
     n = video_obj.n
