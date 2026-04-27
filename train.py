@@ -13,7 +13,6 @@ import gc
 import argparse
 
 import numpy as np
-import pandas as pd
 from tqdm import tqdm, trange
 
 import torch
@@ -230,8 +229,11 @@ if __name__ == '__main__':
     args.recs_dir = recs_dir;
     
     log_file = os.path.join(run_dir, 'log.csv')
-    param_file = os.path.join(run_dir, 'params.csv')
-    pd.DataFrame(params, index=[0]).to_csv(param_file, index=False)
+    param_file = os.path.join(run_dir, 'params.txt')
+
+    with open(param_file, "w") as f:
+        for arg, value in vars(args).items():
+            f.write(f"{arg}: {value}\n")
 
     args_data = args.data
     if args.ensemble == 1:
@@ -280,7 +282,10 @@ if __name__ == '__main__':
         
     optimizer = AdamW(model.parameters(), lr=args.lr)
     scheduler = ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
-    log = pd.DataFrame()
+
+    file_log = open(log_file, 'w')
+    file_log.write('epoch,mse\n')
+    file_log.close()
 
     ### Train loop
     best_mse = None
@@ -311,11 +316,8 @@ if __name__ == '__main__':
             rec_loss_vec.append(rec_loss)
             temp_loss_vec.append(temp_loss)
 
-            metrics = {'mse': float(cur_loss)}
-            metrics['epoch'] = int(epoch)
-
-            log = log.append(metrics, ignore_index=True)
-            log.to_csv(log_file, index=False)
+            with open(log_file, 'a') as file:
+                file.write(str(int(epoch)) + ',' + str(float(cur_loss)) + '\n')
 
         if (best_mse is None) or (cur_loss < best_mse) or (epoch == args.epochs):
             
