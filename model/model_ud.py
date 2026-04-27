@@ -11,7 +11,6 @@ import copy
 from torch import nn
 import numpy as np
 import sys
-import glob2
 import os
 import re
 
