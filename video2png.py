@@ -7,8 +7,10 @@
 #
 
 import os
+import shutil
 import sys
 import subprocess
+from util.video_sdr import *
 
 #
 #
@@ -44,29 +46,37 @@ def process1Video(path_video, fmt = 'png', bRescale = True):
     
     frame_out_str = outpath + '/' + name_base + '_%06d.' + fmt
     
-    result = getColorSpaceInfo(path_video)
+    if shutil.which("ffmpeg"):
+        print("FFMPEG is installed and employed.")
+        result = getColorSpaceInfo(path_video)
 
-    bSet = False
-    if 'unknown' in result:
-        exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
-        bSet = True
+        bSet = False
+        if 'unknown' in result:
+            exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
+            bSet = True
 
-    if ('bt709' in result):
-        exec_str = 'ffmpeg -i ' + path_video + ' -vf "zscale=t=709:p=bt709:m=bt709,format=rgb24" ' + frame_out_str
-        bSet = True
+        if ('bt709' in result):
+            exec_str = 'ffmpeg -i ' + path_video + ' -vf "zscale=t=709:p=bt709:m=bt709,format=rgb24" ' + frame_out_str
+            bSet = True
 
-    if ('bt470bg' in result):
-        exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
-        bSet = True
+        if ('bt470bg' in result):
+            exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
+            bSet = True
 
-    if 'bt2020' in result:
-        exec_str = 'ffmpeg -i ' + path_video + ' -vf "zscale=t=linear:npl=50,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=linear:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p" ' + frame_out_str
-        bSet = True
+        if 'bt2020' in result:
+            exec_str = 'ffmpeg -i ' + path_video + ' -vf "zscale=t=linear:npl=50,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=linear:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p" ' + frame_out_str
+            bSet = True
 
-    if bSet == False:
-        exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
+        if bSet == False:
+            exec_str = 'ffmpeg -i ' + path_video + ' ' + frame_out_str
 
-    subprocess.call(exec_str, shell=True)
+        subprocess.call(exec_str, shell=True)
+    else:
+        print("FFMPEG is not installed, OpenCV2 will be employed.")
+
+        video_stream = VideoSDR(path_video, fmt)
+        video_stream.convertVideoToImages(outpath + '/' + name_base, fmt)
+
  
 if __name__ == "__main__":
 
@@ -74,7 +84,7 @@ if __name__ == "__main__":
     folder = sys.argv[1]
 
     ext = os.path.splitext(folder)[1]
-    ext = ext.lower()
+    ext = ext.lower() 
     
     if ext  == '.mov' or ext == '.mp4':
         process1Video(folder, fmt)
@@ -83,3 +93,4 @@ if __name__ == "__main__":
         for v in videos:
             print(v)
             process1Video(os.path.join(folder, v), fmt)
+             

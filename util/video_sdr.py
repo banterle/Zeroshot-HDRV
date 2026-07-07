@@ -129,3 +129,16 @@ class VideoSDR:
             success = True
         
         return success, fn, fnn, frame
+
+
+    #
+    #
+    #
+    def convertVideoToImages(self, pathOut, fmt):
+        n = self.getNumFrames()
+
+        for i in range(0, n):
+            success, fn, frame_i = self.getNextFrame(False)
+
+            if success:
+                cv2.imwrite(pathOut + '_' + str(i).zfill(6)  + '.' + fmt, frame_i * 255.0)

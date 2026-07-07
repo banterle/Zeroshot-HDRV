@@ -110,7 +110,8 @@ def train(epoch, loader, model, optimizer, args, scheduler = None):
 
             d_1 = (o0_n - o0)
             d_2 = (f0_n_d - f0_d)
-            loss_t = F.l1_loss(d_1, d_2)
+            loss_t = F.mse_loss(d_1, d_2)
+            #loss_t = F.l1_loss(d_1, d_2)
             
         if (args.temp == 2):#L_Stability
             f0_n_d = model.getExpD(f0_n)
