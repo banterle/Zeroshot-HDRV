@@ -72,7 +72,7 @@ class UUp_t(nn.Module):
         if y == None:
             return self.up(x + self.tu2 * float(t))
         else:
-            o2 = Crop2D(y, x)
+            x = Crop2D(y, x)
             xtut = x + self.tu * float(t)
             xtuty = merge(xtut, y)
             return self.up(xtuty)
