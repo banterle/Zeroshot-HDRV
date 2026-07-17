@@ -51,7 +51,7 @@ def train(epoch, loader, model, optimizer, args, scheduler = None):
     #mode 2 and 4
     #gc.collect()
 
-    for f0, o0, o0_n, f0_n in progress:
+    for f0, o0, o0_n, f0_n, baseShift in progress:
 
         if torch.cuda.is_available():
             f0 = f0.cuda()
@@ -63,23 +63,26 @@ def train(epoch, loader, model, optimizer, args, scheduler = None):
         
         if args.mode == 0:
             #ACM SIGGRAPH 2021 and ACM SIGGRAPH ASIA 2021 submissions
-            f0_d = model.fD(f0)
-            o0_u = model.fU(o0)
+            f0_d = model.fD(f0, None, baseShift)
+            o0_u = model.fU(o0, None, baseShift)
                     
             loss_rec = lossL1C(o0, f0_d) + lossL1C(f0, o0_u)
+            
         elif args.mode == 1:
             #ICCP 2022 submission: DDUU --> model = UNetUD(3, 3, False, args.es, 1)
-            f0_d = model.fD(f0)
-            o0_u = model.fU(o0)
+            f0_d = model.fD(f0, None, baseShift)
+            o0_u = model.fU(o0, None, baseShift)
 
             loss_rec = lossL1C(o0, f0_d) + lossL1C(f0, o0_u)
-            o0_du = model.fU(model.fD(o0))
+            o0_d = model.fD(o0, None, baseShift)
+            o0_du = model.fU(o0_d, None, baseShift)
             #o0_dduu = model.fU((model.fU(model.fD(model.fD(o0)))))
             loss_rec += lossL1C(o0_du, o0) * 0.25
+            
         elif (args.mode == 2) or (args.mode == 4):
             #IEEE CVPR 2022 Submission: delta mul --> model = UNetUD(3, 3, False, args.es, 1, None, False)
             delta = o0 / (f0 + model.min_val)
-            delta_p = model.fD(f0)
+            delta_p = model.fD(f0, None, baseShift)
                         
             if args.diff == 0:
                 f0_d = delta_p * f0
@@ -106,7 +109,7 @@ def train(epoch, loader, model, optimizer, args, scheduler = None):
         loss_t = 0.0
             
         if (args.temp == 1):#L_Jacobian
-            f0_n_d = model.getExpD(f0_n)
+            f0_n_d = model.getExpD(f0_n, None, baseShift)
 
             d_1 = (o0_n - o0)
             d_2 = (f0_n_d - f0_d)
@@ -114,7 +117,7 @@ def train(epoch, loader, model, optimizer, args, scheduler = None):
             #loss_t = F.l1_loss(d_1, d_2)
             
         if (args.temp == 2):#L_Stability
-            f0_n_d = model.getExpD(f0_n)
+            f0_n_d = model.getExpD(f0_n, None, baseShift)
             loss_t = F.mse_loss(f0_n_d, f0_d)
 
         if (args.temp > 0):
@@ -172,6 +175,7 @@ if __name__ == '__main__':
     parser.add_argument('--resume', type=str, default='', help='Shall we resume?')
     parser.add_argument('-m', '--mode', type=int, default=4, help='Mode')
     parser.add_argument('-t', '--temp', type=int, default=1, help='Temporal Loss')
+    parser.add_argument('-dl', '--diffusionlike', type=int, default=0, help='Diffusion Like')
     parser.add_argument('-d', '--diff', type=int, default=0, help='Differences Loss')
     parser.add_argument('--scale', type=float, default=1.0, help='Scale values of the input frames')
     parser.add_argument('--samples_is', type=int, default=128, help='Samples')
@@ -195,7 +199,13 @@ if __name__ == '__main__':
     else:
         print('Resume? ' + str(args.resume))
         
+    if args.diffusionlike == 1:
+        args.diffusionlike = True
+    else:
+        args.diffusionlike = False
+
     print('Mode: ' + str(args.mode))
+    print('Diffusion Like: ' + str(args.diffusionlike))
     print('Temporal Coherency: ' + str(args.temp))
     print('Ensemble: ' + str(args.ensemble))
     print('Scaling factor: ' + str(args.scale))
@@ -255,7 +265,7 @@ if __name__ == '__main__':
     num_pixels = img.shape[0] * img.shape[1]
 
     bTemporal = (args.temp > 0)
-    train_data = SDRDataset(train_data, group = args.group, expo_shift = args.es, scale = args.scale, area = num_pixels, temporal = bTemporal)
+    train_data = SDRDataset(train_data, group = args.group, expo_shift = args.es, scale = args.scale, area = num_pixels, temporal = bTemporal, bDiffusionLike = args.diffusionlike)
     
     train_loader = DataLoader(train_data,  batch_size=args.batch, shuffle=True, num_workers=8, pin_memory=True, persistent_workers = True)
 
@@ -276,7 +286,7 @@ if __name__ == '__main__':
     n_input_val = 3
     n_output_val = 3
 
-    model = UNetUD(n_input_val, n_output_val, args.es, resume_str, args.mode)
+    model = UNetUD(n_input_val, n_output_val, args.es, resume_str, args.mode, bDiffusionLike = args.diffusionlike)
 
     if torch.cuda.is_available():
         model = model.cuda()

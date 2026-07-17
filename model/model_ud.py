@@ -16,6 +16,7 @@ import re
 
 #from model.model_attention import UNet
 from model.model import UNet
+from model.model_t import UNet_t
 from util.util_io import fromTorchToNP
 
 #
@@ -25,7 +26,7 @@ class UNetUD(nn.Module):
     #
     #
     #
-    def __init__(self, n_input=3, n_output=3, fstop = 2.0, ckpt_str = None, mode = 4):
+    def __init__(self, n_input=3, n_output=3, fstop = 2.0, ckpt_str = None, mode = 4, bDiffusionLike = False):
         super().__init__()
         
         self.bLoad = False
@@ -50,9 +51,17 @@ class UNetUD(nn.Module):
         if ckpt_str != None:
             self.load_weights(ckpt_str)
         else:
+            print("Init UNetUD")
             if self.bUNet:
-                self.U = UNet(n_input, n_output, fstop =  fstop)
-            self.D = UNet(n_input, n_output, fstop = -fstop)
+                if bDiffusionLike:
+                    self.U = UNet_t(n_input, n_output, fstop =  fstop)
+                else:
+                    self.U = UNet(n_input, n_output, fstop =  fstop)
+                    
+            if bDiffusionLike:
+                self.D = UNet_t(n_input, n_output, fstop = -fstop)
+            else:
+                self.D = UNet(n_input, n_output, fstop = -fstop)
             self.epoch = 0
             
         self.eval()
@@ -127,15 +136,15 @@ class UNetUD(nn.Module):
     #
     #
     #
-    def forward(self, input, mask = None):
-        rec_u = self.fD(input, mask)
-        rec_d = self.fU(input, mask)
+    def forward(self, input, mask = None, t = 2.0):
+        rec_u = self.fD(input, mask, t)
+        rec_d = self.fU(input, mask, t)
         return rec_u, rec_d
 
     #
     #
     #
-    def fU(self, input, mask = None):
+    def fU(self, input, mask = None, t = 2.0):
         if self.bUNet:
             out = self.U(input, mask)
         else:
@@ -146,31 +155,31 @@ class UNetUD(nn.Module):
     #
     #
     #
-    def fD(self, input, mask = None):
-        out = self.D(input, mask)
+    def fD(self, input, mask = None, t = 2.0):
+        out = self.D(input, mask, t)
         return out
 
     #
     #
     #
-    def getExpD(self, input):
+    def getExpD(self, input, mask = None, t = 2.0):
         
         if (self.mode == 0) or (self.mode == 1):
-            return self.fD(input)
+            return self.fD(input, mask, t)
         
         elif (self.mode == 2) or (self.mode == 4):
-            delta_mul = self.fD(input)
+            delta_mul = self.fD(input, mask, t)
             return input * delta_mul
             
     #
     #
     #
-    def getExpU(self, input):
+    def getExpU(self, input, mask = None, t = 2.0):
         if (self.mode == 0) or (self.mode == 1) or (self.mode == 2):
-            return self.fU(input)
+            return self.fU(input, mask, t)
         
         elif (self.mode == 4):
-            delta_mul = self.fD(input)
+            delta_mul = self.fD(input, mask, t)
             return torch.clamp(input / (delta_mul + self.min_val), 0.0, 1.0)
    #
     #
@@ -188,6 +197,10 @@ class UNetUD(nn.Module):
         out = torch.zeros((sz[0], sz[1], sz2, sz3), device = img.device,  dtype = img.dtype)
         out[:,:,0:sz[2],0:sz[3]] = img
         return out
+
+    def cropConvert(img, sz):
+        img = img[:,:,0:sz[2],0:sz[3]]
+        return img.data.cpu().numpy().squeeze()
 
     #
     #
@@ -208,20 +221,23 @@ class UNetUD(nn.Module):
         
         img_i = img
         for i in range(1, (n_exp_down + 1)):
-            img_i = self.addPadding(img_i)
-            img_i = self.getExpD(img_i)
-            img_i = img_i[:,:,0:sz_ori[2],0:sz_ori[3]]
+            
+            img_i = self.addPadding(img_i)              #add padding
+            img_i = self.getExpD(img_i, None, self.fstop)
+            img_i = img_i[:,:,0:sz_ori[2],0:sz_ori[3]]  #remove padding
+            
             exposures.append(fromTorchToNP(img_i.data.cpu().numpy().squeeze()))
             exposure_time = np.power(2.0, float(-i * self.fstop))
             exposures_times.append(exposure_time)
 
         img_i = img
         for i in range(1, (n_exp_up + 1)):
-            img_i = self.addPadding(img_i)
-            img_i = self.getExpU(img_i)
-            img_i = img_i[:,:,0:sz_ori[2],0:sz_ori[3]]
+            img_i = self.addPadding(img_i)              #add padding
+            img_i = self.getExpU(img_i, None, self.fstop)
+            img_i = img_i[:,:,0:sz_ori[2],0:sz_ori[3]]  #remove padding
+            
             exposures.append(fromTorchToNP(img_i.data.cpu().numpy().squeeze()))
-            exposure_time = np.power(2.0, float( i * self.fstop))
+            exposure_time = np.power(2.0, float(i * self.fstop))
             exposures_times.append(exposure_time)
             
         return exposures, exposures_times
@@ -244,37 +260,40 @@ class UNetUD(nn.Module):
         if bTiming:
             t_start = time.time();
 
+        t = self.fstop
+        
         with torch.no_grad():
         
             if (self.mode == 0) or (self.mode == 1):
-                img_d = self.fD(img)
-                img_dd = self.fD(img_d)
+                img_d = self.fD(img, None, t)
+                img_dd = self.fD(img_d, None, t)
                
-                img_u = self.fU(img)
-                img_uu = self.fU(img_u)
+                img_u = self.fU(img, None, t)
+                img_uu = self.fU(img_u, None, t)
                                 
             elif (self.mode == 2):
-                img_d = img * self.fD(img)
-                img_dd = img_d * self.fD(img_d)
+                img_d = img * self.fD(img, None, t)
+                img_dd = img_d * self.fD(img_d, None, t)
                 
-                img_u = self.fU(img)
-                img_uu = self.fU(img_u)
+                img_u = self.fU(img, None, t)
+                img_uu = self.fU(img_u, None, t)
                                 
             elif (self.mode == 4):
-                #exposure down
-                delta_img = self.fD(img)
+                #exposure down -t-stop
+                delta_img = self.fD(img, None, t)
                 delta_img[delta_img<self.exposure_inv_gamma] = self.exposure_inv_gamma
                 img_d = torch.clamp(img * delta_img, 0.0, 1.0)
                                 
-                #exposure down down
-                delta_img_d = self.fD(img_d)
+                #exposure down down -2t-stop
+                delta_img_d = self.fD(img_d, None, t)
                 delta_img_d[delta_img_d<self.exposure_inv_gamma] = self.exposure_inv_gamma
                 img_dd = torch.clamp(img_d * delta_img_d, 0.0, 1.0)
             
-                #exposure up
+                #exposure up +t-stop
                 img_u = torch.clamp(img / (delta_img + self.min_val), 0.0, 1.0)
                 
-                delta_img_u = self.fD(img_u)
+                #exposure up +2t-stop
+                delta_img_u = self.fD(img_u, None, t)
                 delta_img_u[delta_img_u<self.exposure_inv_gamma] = self.exposure_inv_gamma
                 img_uu = torch.clamp(img_u / (delta_img_u + self.min_val), 0.0, 1.0)
               
@@ -282,23 +301,15 @@ class UNetUD(nn.Module):
                 t_end = time.time();
             
             #download from the GPU; perhaps this could be avoided or delayed
-            img_u = img_u[:,:,0:sz_ori[2],0:sz_ori[3]]
-            img_uu = img_uu[:,:,0:sz_ori[2],0:sz_ori[3]]
-            img_d = img_d[:,:,0:sz_ori[2],0:sz_ori[3]]
-            img_dd = img_dd[:,:,0:sz_ori[2],0:sz_ori[3]]
+            img_u = cropConvert(img_u, sz_ori)
+            img_uu = cropConvert(img_uu, sz_ori)
+            img_d = cropConvert(img_d, sz_ori)
+            img_dd = cropConvert(img_dd, sz_ori)
 
-            img_u = img_u.data.cpu().numpy().squeeze()
-            img_uu = img_uu.data.cpu().numpy().squeeze()
-            img_d = img_d.data.cpu().numpy().squeeze()
-            img_dd = img_dd.data.cpu().numpy().squeeze()
-
-            if  (self.mode == 2) or  (self.mode == 4):
-                delta_img = delta_img[:,:,0:sz_ori[2],0:sz_ori[3]]
-                delta_img_d = delta_img_d[:,:,0:sz_ori[2],0:sz_ori[3]]
-                delta_img_u = delta_img_u[:,:,0:sz_ori[2],0:sz_ori[3]]
-                delta_img = delta_img.data.cpu().numpy().squeeze()
-                delta_img_d = delta_img_d.data.cpu().numpy().squeeze()
-                delta_img_u = delta_img_u.data.cpu().numpy().squeeze()
+            if (self.mode == 2) or  (self.mode == 4):
+                delta_img = cropConvert(delta_img, sz_ori)
+                delta_img_d = cropConvert(delta_img_d, sz_ori)
+                delta_img_u = cropConvert(delta_img_u, sz_ori)
             else:
                 delta_img = None
                 delta_img_d = None

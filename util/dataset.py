@@ -34,7 +34,7 @@ class SDRDataset(Dataset):
     #
     #
     #
-    def __init__(self, data, group = None,  expo_shift = 2.0, bRandom = False, scale = 1.0, area = -1, temporal = True, patchSize = 512):
+    def __init__(self, data, group = None,  expo_shift = 2.0, bRandom = False, scale = 1.0, area = -1, temporal = True, patchSize = 512, bDiffusionLike = False):
         self.data = data
         self.expo_shift = expo_shift
         self.group = group
@@ -45,7 +45,8 @@ class SDRDataset(Dataset):
         self.bTemporal = temporal
 
         self.bPatches = False
-
+        self.bDiffusionLike = bDiffusionLike
+        
         if area == -1:
             self.numPatches = 4
         else:
@@ -185,17 +186,23 @@ class SDRDataset(Dataset):
                     img_sdr_n = self.transform(img_sdr_n)
                 
 
+        
+        if self.bDiffusionLike:
+            baseShift = random.random() * self.expo_shift
+        else:
+            baseShift = self.expo_shift
+            
         o0 = torchRound8(torchChangeExposure(img_sdr, shift, 2.2))
-        f0 = torchRound8(torchChangeExposure(img_sdr, shift + self.expo_shift, 2.2))
+        f0 = torchRound8(torchChangeExposure(img_sdr, shift + baseShift, 2.2))
         
         if self.bTemporal:
             o0_n = torchRound8(torchChangeExposure(img_sdr_n, shift, 2.2))
-            f0_n = torchRound8(torchChangeExposure(img_sdr_n, shift + self.expo_shift, 2.2))
+            f0_n = torchRound8(torchChangeExposure(img_sdr_n, shift + baseShift, 2.2))
         else:
             o0_n = []
             f0_n = []
         
-        return f0, o0, o0_n, f0_n
+        return f0, o0, o0_n, f0_n, baseShift
 
     #
     #
