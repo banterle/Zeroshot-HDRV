@@ -22,6 +22,13 @@ from util.util_io import fromTorchToNP
 #
 #
 #
+def cropConvert(img, sz):
+    img = img[:,:,0:sz[2],0:sz[3]]
+    return img.data.cpu().numpy().squeeze()
+
+#
+#
+#
 class UNetUD(nn.Module):
     #
     #
@@ -197,10 +204,6 @@ class UNetUD(nn.Module):
         out = torch.zeros((sz[0], sz[1], sz2, sz3), device = img.device,  dtype = img.dtype)
         out[:,:,0:sz[2],0:sz[3]] = img
         return out
-
-    def cropConvert(img, sz):
-        img = img[:,:,0:sz[2],0:sz[3]]
-        return img.data.cpu().numpy().squeeze()
 
     #
     #
