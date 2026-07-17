@@ -74,8 +74,8 @@ class UUp_t(nn.Module):
         else:
             x = Crop2D(y, x)
             xtut = x + self.tu * float(t)
-            xtuty = merge(xtut, y)
-            return self.up(xtuty)
+            yxtut = merge(y, xtut)
+            return self.up(yxtut)
 
 #
 #Network
